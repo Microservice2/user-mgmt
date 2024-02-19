@@ -17,12 +17,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
-public class JwtConverter implements Converter<Jwt, AbstractAuthenticationToken> {
+public class KeycloackJwtConverter implements Converter<Jwt, AbstractAuthenticationToken> {
     private final JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
 
     private final JwtConverterProperties properties;
 
-    public JwtConverter(JwtConverterProperties properties) {
+    public KeycloackJwtConverter(JwtConverterProperties properties) {
         this.properties = properties;
     }
 
@@ -47,6 +47,7 @@ public class JwtConverter implements Converter<Jwt, AbstractAuthenticationToken>
         Map<String, Object> resource;
         Collection<String> resourceRoles;
 
+        System.out.println("Resource access: "+resourceAccess);
         if (resourceAccess == null
                 || (resource = (Map<String, Object>) resourceAccess.get(properties.getResourceId())) == null
                 || (resourceRoles = (Collection<String>) resource.get("roles")) == null) {

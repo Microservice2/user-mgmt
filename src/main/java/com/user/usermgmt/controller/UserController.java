@@ -22,6 +22,7 @@ public class UserController {
     }
 
     @PostMapping("/createNew")
+    @PreAuthorize("hasRole('admin')")
     public ResponseEntity<ResponseDto> createNewUser(CreateEmployeeDto data) {
         Employee newEmployee = employeeService.createNew(data);
         if (newEmployee == null) {
