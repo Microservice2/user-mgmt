@@ -7,10 +7,14 @@ import com.user.usermgmt.repository.EmployeeRepository;
 import org.apache.commons.text.RandomStringGenerator;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 @Service
 public class EmployeeService implements IEmployee {
@@ -24,6 +28,7 @@ public class EmployeeService implements IEmployee {
 
     @Override
     public Employee createNew(CreateEmployeeDto employeeDto) {
+
         RandomStringGenerator pwdGenerator = new RandomStringGenerator.Builder().withinRange(33, 45)
                 .build();
         final int PASS_LENGTH = 32;
@@ -41,9 +46,15 @@ public class EmployeeService implements IEmployee {
     }
 
     @Override
-    public List<Employee> findAll(int page) {
+    @Async("userTaskExecutor")
+    public CompletableFuture<List<Employee>> findAll(int page) {
         Pageable paging = PageRequest.of(page, SIZE);
-        return employeeRepository.findAllBy(paging);
+        CompletableFuture<List<Employee>> employees = CompletableFuture.supplyAsync(() -> employeeRepository.findAllBy(paging));
+        try {
+            return CompletableFuture.completedFuture(employees.get());
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
